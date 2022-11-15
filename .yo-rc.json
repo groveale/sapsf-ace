@@ -1,0 +1,19 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "whichFolder": "subdir",
+    "solutionName": "sapaces",
+    "componentType": "adaptiveCardExtension",
+    "aceTemplateType": "Basic",
+    "componentName": "TimeOff",
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "version": "1.15.2",
+    "libraryName": "sapaces",
+    "libraryId": "5c761651-4788-484b-adf0-0562b7d6aa2c",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionShortDescription": "sapaces description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false
+  }
+}

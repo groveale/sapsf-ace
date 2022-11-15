@@ -1,0 +1,18 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "time-off-adaptive-card-extension": {
+      "components": [
+        {
+          "entrypoint": "./lib/adaptiveCardExtensions/timeOff/TimeOffAdaptiveCardExtension.js",
+          "manifest": "./src/adaptiveCardExtensions/timeOff/TimeOffAdaptiveCardExtension.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "TimeOffAdaptiveCardExtensionStrings": "lib/adaptiveCardExtensions/timeOff/loc/{locale}.js"
+  }
+}
