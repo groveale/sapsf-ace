@@ -20,7 +20,11 @@
     "description": { "default": "TimeOff description" },
     "officeFabricIconFontName": "Vacation",
     "properties": {
-      "title": "Time Off"
+      "title": "Time Off",
+      "SAPSFHostname": "https://sandbox.api.sap.com/successfactors",
+      "SAPSFAPIKey": "iJz8ydL4qontZArsBsUowtYGxktmqc0t",
+      "listTitle": "TimeOffConfig",
+      "SAPAdField": "employeeId"
     },
     "cardSize": "Medium"
   }]

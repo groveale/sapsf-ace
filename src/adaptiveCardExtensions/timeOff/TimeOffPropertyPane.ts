@@ -18,10 +18,24 @@ export class TimeOffPropertyPane {
             {
               groupFields: [
                 PropertyPaneTextField('listTitle', {
-                  label: strings.ListFieldLabel
+                  label: strings.ListFieldLabel,
+                  value: strings.ListTitle
                 }),
-                PropertyPaneTextField('SAPAdProperty', {
-                  label: strings.SAPAdFieldLabel
+                PropertyPaneTextField('SAPAdField', {
+                  label: strings.SAPAdFieldLabel,
+                  value: strings.SAPAdField
+                })
+              ]
+            },
+            {
+              groupFields: [
+                PropertyPaneTextField('SAPSFHostname', {
+                  label: strings.SAPSFHostnameLabel,
+                  value: strings.SAPSFHostname
+                }),
+                PropertyPaneTextField('SAPSFAPIKey', {
+                  label: strings.SAPSFAPIKeyLabel,
+                  value: strings.SAPSFAPIKey
                 })
               ]
             }

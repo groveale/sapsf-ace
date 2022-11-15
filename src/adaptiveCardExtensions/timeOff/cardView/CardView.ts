@@ -29,7 +29,7 @@ export class CardView extends BasePrimaryTextCardView<ITimeOffAdaptiveCardExtens
     return {
       primaryText: this.state.daysAvailable,
       title: this.properties.title,
-      description: strings.Description
+      description: this.state.description
     };
   }
 

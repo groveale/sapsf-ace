@@ -21,15 +21,9 @@ export class TimeAccount implements ITimeAccount {
       public base64: string= "",
       public balanceDays: number,
       public blanaceHours: number,
+      public balanceDaysString: string = "",
+      public balanceHoursString: string= ""
     ) { }
-  
-    public get balanceDaysString(): string {
-      return this.balanceDays.toString()
-    }
-
-    public get balanceHoursString(): string {
-      return this.blanaceHours.toString()
-    }
 
     public get base64OfImage(): string {
       return this.base64

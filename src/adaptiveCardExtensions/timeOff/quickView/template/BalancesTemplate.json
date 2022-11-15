@@ -9,7 +9,7 @@
             "items": [
                 {
                     "type": "TextBlock",
-                    "text": "Current balance",
+                    "text": "Current balances",
                     "wrap": true,
                     "size": "Medium",
                     "weight": "Bolder",
@@ -31,7 +31,7 @@
                         },
                         {
                             "type": "Column",
-                            "width": 50,
+                            "width": 60,
                             "items": [
                                 {
                                     "type": "TextBlock",
@@ -39,20 +39,6 @@
                                     "wrap": true,
                                     "size": "Small",
                                     "weight": "Bolder"
-                                }
-                            ]
-                        },
-                        {
-                            "type": "Column",
-                            "width": 15,
-                            "items": [
-                                {
-                                    "type": "TextBlock",
-                                    "text": "Hours",
-                                    "wrap": true,
-                                    "size": "Small",
-                                    "weight": "Bolder",
-                                    "horizontalAlignment": "Center"
                                 }
                             ]
                         },
@@ -94,7 +80,7 @@
                                 },
                                 {
                                     "type": "Column",
-                                    "width": 50,
+                                    "width": 60,
                                     "items": [
                                         {
                                             "type": "TextBlock",
@@ -108,18 +94,6 @@
                                             "wrap": true,
                                             "size": "Small",
                                             "isSubtle": true
-                                        }
-                                    ]
-                                },
-                                {
-                                    "type": "Column",
-                                    "width": 15,
-                                    "items": [
-                                        {
-                                            "type": "TextBlock",
-                                            "text": "${balanceHoursString}",
-                                            "wrap": true,
-                                            "horizontalAlignment": "Center"
                                         }
                                     ]
                                 },
