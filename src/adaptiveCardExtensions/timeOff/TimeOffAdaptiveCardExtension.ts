@@ -19,6 +19,7 @@ export interface ITimeOffAdaptiveCardExtensionState {
   timeOffAccounts: ITimeAccount[];
   daysAvailable: string;
   description: string;
+  sapUserName: string;
 }
 
 const CARD_VIEW_REGISTRY_ID: string = 'TimeOff_CARD_VIEW';
@@ -34,10 +35,13 @@ export default class TimeOffAdaptiveCardExtension extends BaseAdaptiveCardExtens
     this.state = {
       timeOffAccounts: [],
       daysAvailable: "Calculating days",
-      description: strings.Description
+      description: strings.Description,
+      sapUserName: ""
     };
 
+    await this.getSAPSFUserNameFromAAD()
     await this.getTimeAccountsFromSPOList()
+    let id = this.state.sapUserName
     await this.getTimeAccountDetailsFromSAPSF()
     
     // Register Card Views
@@ -67,9 +71,9 @@ export default class TimeOffAdaptiveCardExtension extends BaseAdaptiveCardExtens
     return this._deferredPropertyPane?.getPropertyPaneConfiguration();
   }
 
-  private async getTimeAccountsFromSPOList() {
+  private async getTimeAccountsFromSPOList() : Promise<void>  {
 
-    await this.context.spHttpClient.get(
+    return await this.context.spHttpClient.get(
       `${this.context.pageContext.web.absoluteUrl}` +
         `/_api/web/lists/getByTitle('${this.properties.listTitle}')/items?$filter=(ShowInCard eq 1)&$select=HolidayTypeSAPIdentifier,HolidayTypeDescription,HolidayTypeIcon,Title,ShowInCard`,
       SPHttpClient.configurations.v1
@@ -117,17 +121,24 @@ export default class TimeOffAdaptiveCardExtension extends BaseAdaptiveCardExtens
       ));
   }
 
-  private async getSAPSFUserNameFromAAD() {
 
+  private async getSAPSFUserNameFromAAD() : Promise<void>  {
+    return this.context.msGraphClientFactory
+      .getClient('3')
+      .then(client => client.api('me').select(`${this.properties.SAPAdField}`).get())
+      .then((sapSAPUserFromAAD: any) => {
+        this.setState({
+          sapUserName: sapSAPUserFromAAD[`${this.properties.SAPAdField}`]
+      });
+    })
   }
 
-  private async getTimeAccountDetailsFromSAPSF() {
-
-
-
-
-    this.context.httpClient
-      .get(`${this.properties.SAPSFHostname}/odata/v2/EmpTimeAccountBalance?$filter=userId eq 'sfadmin' and timeAccountType in 'TAT_VAC_REC', 'TAT_SICK_REC'&$format=json`, HttpClient.configurations.v1,
+  private async getTimeAccountDetailsFromSAPSF() : Promise<void>  {
+    let totalBalance = 0
+    console.log(this.state.timeOffAccounts.length);
+    this.state.timeOffAccounts.forEach(timeAccount => {
+      this.context.httpClient
+      .get(`${this.properties.SAPSFHostname}/odata/v2/EmpTimeAccountBalance?$filter=userId eq '${this.state.sapUserName}' and timeAccountType eq '${timeAccount.sapIdentifier}'&$format=json`, HttpClient.configurations.v1,
         {
           headers: [
             ['accept', 'application/json'],
@@ -137,26 +148,23 @@ export default class TimeOffAdaptiveCardExtension extends BaseAdaptiveCardExtens
       .then((res: HttpClientResponse): Promise<any> => {
         return res.json();
       })
-      .then((response: any): number => {
+      .then((response: any): void => {
         console.log(response.d.results.length);
-        let balance = 0
+        
         let balancesFromSAPSF: [] = response.d.results
+        let accountBalance = 0
         if (balancesFromSAPSF)
         {
-            balancesFromSAPSF.forEach(account => {
-              let timeAccount = this.state.timeOffAccounts.filter((i) => i.sapIdentifier === account['timeAccountType']);
-              if(timeAccount)
-              {
-                timeAccount[0].balanceDaysString = account['balance']
-                balance += +account['balance']
-              }
+          balancesFromSAPSF.forEach(balance => {
+            accountBalance += +balance['balance']
           });
         }
-        return balance;
-      })
-      .then((balance) => this.setState(
-        { daysAvailable: balance.toString() + " days" }
-      ));;
+        timeAccount.balanceDaysString = accountBalance.toString()
+        totalBalance += accountBalance
+        })
+        .then(() => this.setState(
+          { daysAvailable: totalBalance.toString() + " days" }
+        ));
+    })
   }
-
 }

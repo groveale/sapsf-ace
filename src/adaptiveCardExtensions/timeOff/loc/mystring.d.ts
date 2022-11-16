@@ -3,6 +3,8 @@ declare interface ITimeOffAdaptiveCardExtensionStrings {
   TitleFieldLabel: string;
   ListFieldLabel: string;
   ListTitle: string;
+  FAQLinkLabel: string;
+  FAQLink: string;
   SAPAdFieldLabel: string;
   SAPAdField: string;
   SAPSFAPIKey: string;

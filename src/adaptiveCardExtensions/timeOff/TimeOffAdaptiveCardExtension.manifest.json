@@ -22,7 +22,7 @@
     "properties": {
       "title": "Time Off",
       "SAPSFHostname": "https://sandbox.api.sap.com/successfactors",
-      "SAPSFAPIKey": "iJz8ydL4qontZArsBsUowtYGxktmqc0t",
+      "SAPSFAPIKey": "r58y9XCsCOtP8PpR1mab4XjPL3FLufIK",
       "listTitle": "TimeOffConfig",
       "SAPAdField": "employeeId"
     },
