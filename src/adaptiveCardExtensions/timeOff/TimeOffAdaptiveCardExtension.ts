@@ -13,6 +13,7 @@ export interface ITimeOffAdaptiveCardExtensionProps {
   SAPSFAPIKey: string;
   listTitle: string;
   SAPAdField: string;
+  FAQLink: string
 }
 
 export interface ITimeOffAdaptiveCardExtensionState {

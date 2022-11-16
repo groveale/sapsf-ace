@@ -33,12 +33,12 @@ export class CardView extends BasePrimaryTextCardView<ITimeOffAdaptiveCardExtens
     };
   }
 
-  public get onCardSelection(): IQuickViewCardAction | IExternalLinkCardAction | undefined {
-    return {
-      type: 'ExternalLink',
-      parameters: {
-        target: 'https://www.bing.com'
-      }
-    };
-  }
+  // public get onCardSelection(): IQuickViewCardAction | IExternalLinkCardAction | undefined {
+  //   return {
+  //     type: 'ExternalLink',
+  //     parameters: {
+  //       target: this.properties.FAQLink
+  //     }
+  //   };
+  // }
 }

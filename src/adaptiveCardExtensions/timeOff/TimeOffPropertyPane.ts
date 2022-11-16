@@ -38,7 +38,15 @@ export class TimeOffPropertyPane {
                   value: strings.SAPSFAPIKey
                 })
               ]
-            }
+            },
+            {
+              groupFields: [
+                PropertyPaneTextField('FAQLink', {
+                  label: strings.FAQLinkLabel,
+                  value: strings.FAQLink
+                })
+              ]
+            },
           ]
         }
       ]

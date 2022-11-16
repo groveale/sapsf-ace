@@ -24,7 +24,8 @@
       "SAPSFHostname": "https://sandbox.api.sap.com/successfactors",
       "SAPSFAPIKey": "r58y9XCsCOtP8PpR1mab4XjPL3FLufIK",
       "listTitle": "TimeOffConfig",
-      "SAPAdField": "employeeId"
+      "SAPAdField": "employeeId",
+      "FAQLink": "https://groverale.sharepoint.com/sites/home/SitePages/FAQs.aspx"
     },
     "cardSize": "Medium"
   }]

@@ -20,7 +20,7 @@ export class QuickView extends BaseAdaptiveCardView<
       subTitle: strings.SubTitle,
       title: strings.Title,
       items: this.state.timeOffAccounts,
-      faqsLink: "https://google.com"
+      faqsLink: this.properties.FAQLink
     };
   }
 
