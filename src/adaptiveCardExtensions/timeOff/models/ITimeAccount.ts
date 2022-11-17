@@ -2,7 +2,8 @@ export interface ITimeAccount {
     id: number;
     title: string;
     description: string;
-    sapIdentifier: string;
+    sapIdentifierTAT: string;
+    sapIdentifierTT: string;
     picture: string;
     base64: string;
     balanceDays: number;
@@ -16,7 +17,8 @@ export class TimeAccount implements ITimeAccount {
       public id: number,
       public title: string = "",
       public description: string = "",
-      public sapIdentifier: string = "",
+      public sapIdentifierTAT: string = "",
+      public sapIdentifierTT: string = "",
       public picture: string = "",
       public base64: string= "",
       public balanceDays: number,

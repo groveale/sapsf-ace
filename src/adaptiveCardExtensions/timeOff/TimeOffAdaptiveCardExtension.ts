@@ -99,7 +99,7 @@ export default class TimeOffAdaptiveCardExtension extends BaseAdaptiveCardExtens
               var iconJson = JSON.parse(item['HolidayTypeIcon']);
               iconImage = `${iconJson.serverUrl}${iconJson.serverRelativeUrl}`
             }
-            const timeAccount = new TimeAccount(item['ID'], item['Title'], item['HolidayTypeDescription'], item['HolidayTypeSAPIdentifier'], iconImage, "", 0, 0);
+            const timeAccount = new TimeAccount(item['ID'], item['Title'], item['HolidayTypeDescription'], item['HolidayTypeSAPIdentifier'], item['HolidayTimeTypeSAPIdentifier'], iconImage, "", 0, 0);
             timeAccountSPOArray.push(timeAccount)
           })
         }
@@ -136,10 +136,11 @@ export default class TimeOffAdaptiveCardExtension extends BaseAdaptiveCardExtens
 
   private async getTimeAccountDetailsFromSAPSF() : Promise<void>  {
     let totalBalance = 0
+    let today = new Date()
     console.log(this.state.timeOffAccounts.length);
     this.state.timeOffAccounts.forEach(timeAccount => {
       this.context.httpClient
-      .get(`${this.properties.SAPSFHostname}/odata/v2/EmpTimeAccountBalance?$filter=userId eq '${this.state.sapUserName}' and timeAccountType eq '${timeAccount.sapIdentifier}'&$format=json`, HttpClient.configurations.v1,
+      .get(`${this.properties.SAPSFHostname}/odata/v2/EmpTimeAccountBalance?$filter=userId eq '${this.state.sapUserName}' and timeAccountType eq '${timeAccount.sapIdentifierTAT}'&$format=json`, HttpClient.configurations.v1,
         {
           headers: [
             ['accept', 'application/json'],
@@ -165,7 +166,23 @@ export default class TimeOffAdaptiveCardExtension extends BaseAdaptiveCardExtens
         })
         .then(() => this.setState(
           { daysAvailable: totalBalance.toString() + " days" }
-        ));
+        ))
+      //   .then(() => this.context.httpClient
+      //   .get(`${this.properties.SAPSFHostname}/odata/v2/EmployeeTime?$filter=userId eq '${this.state.sapUserName}' and timeType eq '${timeAccount.sapIdentifierTT} endDate gt datetime'${today}'&$select=approvalStatus,quantityInHours,quantityInDays,startDate,endDate,timeType&$format=json`, HttpClient.configurations.v1,
+      //     {
+      //       headers: [
+      //         ['accept', 'application/json'],
+      //         ['APIKey', this.properties.SAPSFAPIKey]
+      //       ]
+      //     })
+      //   .then((res: HttpClientResponse): Promise<any> => {
+      //     return res.json();
+      //   })
+      //   .then((response: any): void => {
+      //     console.log(response.d.results.length);
+      //   })
+      // );
+
     })
   }
 }
