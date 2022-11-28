@@ -14,7 +14,19 @@ export class TimeOffAzurePropertyPane {
                   label: strings.TitleFieldLabel
                 })
               ]
-            }
+            },
+            {
+              groupFields: [
+                PropertyPaneTextField('listTitle', {
+                  label: strings.ListFieldLabel,
+                  value: strings.ListTitle
+                }),
+                PropertyPaneTextField('SAPAdField', {
+                  label: strings.SAPAdFieldLabel,
+                  value: strings.SAPAdField
+                })
+              ]
+            },
           ]
         }
       ]

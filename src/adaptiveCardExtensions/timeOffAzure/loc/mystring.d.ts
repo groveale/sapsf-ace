@@ -7,6 +7,14 @@ declare interface ITimeOffAzureAdaptiveCardExtensionStrings {
   Description: string;
   QuickViewButton: string;
   LoadingMessage: string;
+  ErrorMessage: string;
+  UnconfiguredTitle: string;
+  ListFieldLabel: string;
+  ListTitle: string;
+  FAQLinkLabel: string;
+  FAQLink: string;
+  SAPAdFieldLabel: string;
+  SAPAdField: string;
 }
 
 declare module 'TimeOffAzureAdaptiveCardExtensionStrings' {

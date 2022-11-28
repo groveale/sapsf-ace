@@ -20,7 +20,10 @@
     "description": { "default": "TimeOffAzure description" },
     "officeFabricIconFontName": "SharePointLogo",
     "properties": {
-      "title": "TimeOffAzure"
+      "title": "TimeOffAzure",
+      "listTitle": "TimeOffConfig",
+      "SAPAdField": "employeeId",
+      "FAQLink": "https://groverale.sharepoint.com/sites/home/SitePages/FAQs.aspx"
     },
     "cardSize": "Medium"
   }]
