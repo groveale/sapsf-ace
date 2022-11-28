@@ -32,6 +32,12 @@
         "id": "d4c5a906-475d-443e-8a61-fbc6ef91ce4a",
         "version": "1.0.0.0"
       }
+    ],
+    "webApiPermissionRequests": [
+      {
+        "resource": "spfx-sap-aces101",
+        "scope": "user_impersonation"
+      }
     ]
   },
   "paths": {

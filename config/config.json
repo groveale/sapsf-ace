@@ -9,10 +9,19 @@
           "manifest": "./src/adaptiveCardExtensions/timeOff/TimeOffAdaptiveCardExtension.manifest.json"
         }
       ]
+    },
+    "time-off-azure-adaptive-card-extension": {
+      "components": [
+        {
+          "entrypoint": "./lib/adaptiveCardExtensions/timeOffAzure/TimeOffAzureAdaptiveCardExtension.js",
+          "manifest": "./src/adaptiveCardExtensions/timeOffAzure/TimeOffAzureAdaptiveCardExtension.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
   "localizedResources": {
-    "TimeOffAdaptiveCardExtensionStrings": "lib/adaptiveCardExtensions/timeOff/loc/{locale}.js"
+    "TimeOffAdaptiveCardExtensionStrings": "lib/adaptiveCardExtensions/timeOff/loc/{locale}.js",
+    "TimeOffAzureAdaptiveCardExtensionStrings": "lib/adaptiveCardExtensions/timeOffAzure/loc/{locale}.js"
   }
 }
