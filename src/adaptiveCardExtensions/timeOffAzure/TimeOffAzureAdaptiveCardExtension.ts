@@ -9,7 +9,8 @@ import { ITimeAccount } from './models/ITimeAccount'
 import * as strings from 'TimeOffAdaptiveCardExtensionStrings';
 import { ErrorCardView } from './cardView/ErrorCardView';
 import { UnconfiguredCardView } from './cardView/UnconfiguredCardView';
-import { SPHttpClient, HttpClient, HttpClientResponse } from '@microsoft/sp-http';
+import { SPHttpClient, HttpClient, HttpClientResponse, IHttpClientOptions } from '@microsoft/sp-http';
+import { ITimeBooked, ITimeBookedResponse } from './models/ITimeBooked';
 
 export interface ITimeOffAzureAdaptiveCardExtensionProps {
   title: string;
@@ -20,10 +21,10 @@ export interface ITimeOffAzureAdaptiveCardExtensionProps {
 
 export interface ITimeOffAzureAdaptiveCardExtensionState {
   timeOffAccounts: ITimeAccount[];
-  daysAvailable: string;
+  daysAvailable: number;
   description: string;
   sapUserName: string;
-  daysUntilNexTimeOff: string;
+  daysUntilNexTimeOff: number;
   currentlyOnLeave: Boolean
   cardState: CardState
   exceptionMessage: string
@@ -50,16 +51,17 @@ export default class TimeOffAzureAdaptiveCardExtension extends BaseAdaptiveCardE
   ITimeOffAzureAdaptiveCardExtensionState
 > {
   private _deferredPropertyPane: TimeOffAzurePropertyPane | undefined;
+  private sapClient: AadHttpClient;
 
   public async onInit(): Promise<void> {
     this.state = {
         timeOffAccounts: [],
-        daysAvailable: "Calculating days",
+        daysAvailable: 0,
         description: strings.Description,
         sapUserName: "",
-        daysUntilNexTimeOff: "",
+        daysUntilNexTimeOff: 0,
         currentlyOnLeave: false,
-        cardState: 2,
+        cardState: CardState.Loading,
         exceptionMessage: "try catch this",
         configMessage: "missing library",
         loadingLog: "Warming up"
@@ -74,11 +76,14 @@ export default class TimeOffAzureAdaptiveCardExtension extends BaseAdaptiveCardE
     // First Step is to get SAP User Name
     await this.getSAPSFUserNameFromAAD()
 
-    // Now Get SAP timeaccount details from SPO list
+    // Init the Time Off API
+    await this.initTimeOffAPI()
+
+    // Now Get SAP timeaccount details from SPO list and balances from SAP
     await this.getTimeAccountsFromSPOList()
 
-    // Call the Enterprise API
-
+    // Work out days until next time off
+    //this.setState( { cardState: CardState.Loaded });
 
     return Promise.resolve(); // this._fetchData();
   }
@@ -115,7 +120,7 @@ export default class TimeOffAzureAdaptiveCardExtension extends BaseAdaptiveCardE
 
   private async getSAPSFUserNameFromAAD() : Promise<void>  {
     try {
-        return this.context.msGraphClientFactory
+        return await this.context.msGraphClientFactory
         .getClient('3')
         .then(client => client.api('me').select(`${this.properties.SAPAdField}`).get())
         .then((sapSAPUserFromAAD: any) => {
@@ -139,16 +144,17 @@ export default class TimeOffAzureAdaptiveCardExtension extends BaseAdaptiveCardE
   }
 
   private async getTimeAccountsFromSPOList() : Promise<void>  {
-
+    let nextLeaveDate: Date = new Date()
+    let daysAvalible: number = 0
     return await this.context.spHttpClient.get(
       `${this.context.pageContext.web.absoluteUrl}` +
-        `/_api/web/lists/getByTitle('${this.properties.listTitle}')/items?$filter=(ShowInCard eq 1)&$select=HolidayTypeSAPIdentifier,HolidayTypeDescription,HolidayTypeIcon,Title,ShowInCard`,
+        `/_api/web/lists/getByTitle('${this.properties.listTitle}')/items?$filter=(ShowInCard eq 1)&$select=HolidayTypeSAPIdentifier,HolidayTypeDescription,HolidayTimeTypeSAPIdentifier,HolidayTypeIcon,Title,ShowInCard`,
       SPHttpClient.configurations.v1
     )
     .then((res: HttpClientResponse): Promise<any> => {
       return res.json();
     })
-    .then((response: any): ITimeAccount[] => {
+    .then(async (response: any): Promise<void> => {
       let timeAccountSPOArray: ITimeAccount[] = []
       try {
         console.log(response.value.length);
@@ -156,7 +162,9 @@ export default class TimeOffAzureAdaptiveCardExtension extends BaseAdaptiveCardE
         
         if (timeAccountsFromSPO)
         {
-          timeAccountsFromSPO.forEach(item => {
+
+          for (const item of timeAccountsFromSPO) {
+
             // extract header image URL
             let iconImage:string = "";
   
@@ -171,37 +179,135 @@ export default class TimeOffAzureAdaptiveCardExtension extends BaseAdaptiveCardE
             timeAccount.id = item['ID']
             timeAccount.title = item['Title']
             timeAccount.description = item['HolidayTypeDescription']
-            timeAccount.sapIdentifierTAT = item['HolidayTypeSAPIdentifier'],
+            timeAccount.sapIdentifierTAT = item['HolidayTypeSAPIdentifier']
             timeAccount.sapIdentifierTT =  item['HolidayTimeTypeSAPIdentifier']
             timeAccount.picture = iconImage
 
+            // call Azure function that calls SAP
+            let timeBooked: ITimeBookedResponse = await this.getTimeOffBalanceFromTimeOffAPI(timeAccount.sapIdentifierTAT, timeAccount.sapIdentifierTT)
+
+            timeAccount.balanceDays = timeBooked.balanceDays
+            timeAccount.blanaceHours = timeBooked.balanceHours
+            timeAccount.timeBookedPast = timeBooked.timeBookedPast
+            timeAccount.timeBookedUpcoming = timeBooked.timeBookedUpcoming
+
+            if (timeAccount.timeBookedUpcoming.length)
+            {
+              // upcoming holiday booked to sort
+              const sortedAsc = timeAccount.timeBookedUpcoming.sort(
+                (objA, objB) => objA.startDate.getTime() - objB.startDate.getTime(),
+              );
+
+              let startDateOfNearestLeave = new Date(sortedAsc[0].startDate as unknown as string)
+              console.log(typeof(startDateOfNearestLeave))
+
+              //If first TAT then we set it regardless
+              if (!nextLeaveDate)
+              {
+                nextLeaveDate = startDateOfNearestLeave
+              }
+              
+              if (nextLeaveDate.getTime() > startDateOfNearestLeave.getTime())
+              {
+                nextLeaveDate = startDateOfNearestLeave
+              }
+
+            }
+
+            // append days
+            daysAvalible += timeAccount.balanceDays
+
             timeAccountSPOArray.push(timeAccount)
-          })
+          }
         }
+
+        // Figure out when next holiday is
+        let today = new Date()
+        let daysUntilLeave = nextLeaveDate.getTime() - today.getTime() 
+        let days = Math. ceil(daysUntilLeave / (1000 * 60 * 60 * 24))
+
+        this.setState(
+        { 
+          timeOffAccounts: timeAccountSPOArray,
+          loadingLog: `${timeAccountSPOArray.length} SAP TAT obtained from SPO list`,
+          daysUntilNexTimeOff: days,
+          daysAvailable: daysAvalible  
+        })
       }
-      catch
-      {
-        console.log("Error")
+      catch(error) {
+        // we'll proceed, but let's report it
+        console.log(error.message)
         this.setState(
           { 
             cardState: CardState.Error,
-            exceptionMessage: "Unable to read SharePoint list"
+            exceptionMessage: "Unable to obtain SAP data"
           }
         );
-      }
-      
-      return timeAccountSPOArray
-      })
-    .then((items: ITimeAccount[]) => this.setState(
-      { 
-        timeOffAccounts: items,
-        loadingLog: `${items.length} SAP TAT obtained from SPO list`  
-      }
-    ));
+      }     
+    })
   }
 
+  private async initTimeOffAPI() : Promise<void>  {
+    try{
+      return await this.context.aadHttpClientFactory
+      .getClient('018ef16d-b0c0-45b7-b383-ab8718c63d9a')
+      .then((client: AadHttpClient): void => {
+        this.sapClient = client;
+      })
+      .then(() => {
+        this.setState({
+          loadingLog: "Connected to API"
+        });
+      });
+    }
+    catch {
+      this.setState(
+        { 
+          cardState: CardState.Error,
+          exceptionMessage: "Unable to connect to API"
+        }
+      );
+    }
+    finally {
+      return Promise.resolve()
+    }  
+  }
 
+  private async getTimeOffBalanceFromTimeOffAPI(timeAccountType, timeType) : Promise<ITimeBookedResponse>  {
+    let timeBooked = {} as ITimeBookedResponse
 
+    const requestHeaders: Headers = new Headers();
+    requestHeaders.append('Content-type', 'application/json');
+
+    const body: string = JSON.stringify({
+      'sapUserNameToSearch': this.state.sapUserName,
+      'timeAccountType': timeAccountType,
+      'timeType': timeType,
+    });
+
+    const httpClientOptions: IHttpClientOptions = {
+      body: body,
+      headers: requestHeaders
+    };
+
+    return await this.sapClient.post(
+      "https://spfx-aces101.azurewebsites.net/api/GetSFTimeAccountBalances",
+      AadHttpClient.configurations.v1,
+      httpClientOptions)
+      .then((res: HttpClientResponse): Promise<any> => {
+        return res.json();
+      })
+      .then((balances: any): ITimeBookedResponse => {
+        // serilisation
+        timeBooked.balanceDays = balances['balanceDays']
+        timeBooked.balanceHours = balances['balanceHours']
+        timeBooked.timeBookedPast = balances['pastTime']
+        timeBooked.timeBookedUpcoming = balances['upcomingTime']
+        return timeBooked
+    })
+  }
+
+  // Legacy
   private _fetchData(): Promise<void> {
     return this.context.aadHttpClientFactory
       .getClient('018ef16d-b0c0-45b7-b383-ab8718c63d9a')

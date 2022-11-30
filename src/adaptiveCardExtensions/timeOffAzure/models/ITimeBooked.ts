@@ -1,3 +1,4 @@
+
 export interface ITimeBooked {
     approvalStatus: string;
     endDate: Date;
@@ -6,3 +7,10 @@ export interface ITimeBooked {
     quantityInHours: number;
     quantityInDays: number;
   }
+
+export interface ITimeBookedResponse {
+  timeBookedPast: ITimeBooked[];
+  timeBookedUpcoming: ITimeBooked[];
+  balanceDays: number
+  balanceHours: number
+}
