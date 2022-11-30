@@ -13,4 +13,5 @@ export interface ITimeBookedResponse {
   timeBookedUpcoming: ITimeBooked[];
   balanceDays: number
   balanceHours: number
+  daysUntilNextLeave: number
 }

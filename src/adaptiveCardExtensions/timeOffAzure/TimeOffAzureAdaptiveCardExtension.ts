@@ -144,8 +144,8 @@ export default class TimeOffAzureAdaptiveCardExtension extends BaseAdaptiveCardE
   }
 
   private async getTimeAccountsFromSPOList() : Promise<void>  {
-    let nextLeaveDate: Date = new Date()
     let daysAvalible: number = 0
+    let daysUntilNextLeave: number = 10000
     return await this.context.spHttpClient.get(
       `${this.context.pageContext.web.absoluteUrl}` +
         `/_api/web/lists/getByTitle('${this.properties.listTitle}')/items?$filter=(ShowInCard eq 1)&$select=HolidayTypeSAPIdentifier,HolidayTypeDescription,HolidayTimeTypeSAPIdentifier,HolidayTypeIcon,Title,ShowInCard`,
@@ -191,47 +191,24 @@ export default class TimeOffAzureAdaptiveCardExtension extends BaseAdaptiveCardE
             timeAccount.timeBookedPast = timeBooked.timeBookedPast
             timeAccount.timeBookedUpcoming = timeBooked.timeBookedUpcoming
 
-            if (timeAccount.timeBookedUpcoming.length)
-            {
-              // upcoming holiday booked to sort
-              const sortedAsc = timeAccount.timeBookedUpcoming.sort(
-                (objA, objB) => objA.startDate.getTime() - objB.startDate.getTime(),
-              );
-
-              let startDateOfNearestLeave = new Date(sortedAsc[0].startDate as unknown as string)
-              console.log(typeof(startDateOfNearestLeave))
-
-              //If first TAT then we set it regardless
-              if (!nextLeaveDate)
-              {
-                nextLeaveDate = startDateOfNearestLeave
-              }
-              
-              if (nextLeaveDate.getTime() > startDateOfNearestLeave.getTime())
-              {
-                nextLeaveDate = startDateOfNearestLeave
-              }
-
-            }
-
             // append days
             daysAvalible += timeAccount.balanceDays
+
+            if (timeBooked.daysUntilNextLeave < daysUntilNextLeave)
+            {
+              daysUntilNextLeave = timeBooked.daysUntilNextLeave
+            }
 
             timeAccountSPOArray.push(timeAccount)
           }
         }
-
-        // Figure out when next holiday is
-        let today = new Date()
-        let daysUntilLeave = nextLeaveDate.getTime() - today.getTime() 
-        let days = Math. ceil(daysUntilLeave / (1000 * 60 * 60 * 24))
-
         this.setState(
         { 
           timeOffAccounts: timeAccountSPOArray,
-          loadingLog: `${timeAccountSPOArray.length} SAP TAT obtained from SPO list`,
-          daysUntilNexTimeOff: days,
-          daysAvailable: daysAvalible  
+          loadingLog: `${timeAccountSPOArray.length} Time Accounts from SAP`,
+          daysUntilNexTimeOff: daysUntilNextLeave,
+          daysAvailable: daysAvalible,
+          cardState: CardState.Loaded,  
         })
       }
       catch(error) {
@@ -303,6 +280,7 @@ export default class TimeOffAzureAdaptiveCardExtension extends BaseAdaptiveCardE
         timeBooked.balanceHours = balances['balanceHours']
         timeBooked.timeBookedPast = balances['pastTime']
         timeBooked.timeBookedUpcoming = balances['upcomingTime']
+        timeBooked.daysUntilNextLeave = balances['daysUntilNextLeave']
         return timeBooked
     })
   }

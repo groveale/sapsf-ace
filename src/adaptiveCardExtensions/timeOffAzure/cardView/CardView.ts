@@ -25,8 +25,8 @@ export class CardView extends BasePrimaryTextCardView<ITimeOffAzureAdaptiveCardE
 
   public get data(): IPrimaryTextCardParameters {
     let nextTimeOff: string = "Next time off in"
-    if(this.state.daysUntilNexTimeOff >= 0) {
-      nextTimeOff = "Currently on leave"
+    if(this.state.daysUntilNexTimeOff <= 0) {
+      nextTimeOff = "Currently on leave 😎"
     }
     else {
       nextTimeOff = `${nextTimeOff} ${this.state.daysUntilNexTimeOff} days`
