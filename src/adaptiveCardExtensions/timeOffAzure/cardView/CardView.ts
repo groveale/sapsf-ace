@@ -28,6 +28,10 @@ export class CardView extends BasePrimaryTextCardView<ITimeOffAzureAdaptiveCardE
     if(this.state.daysUntilNexTimeOff <= 0) {
       nextTimeOff = "Currently on leave 😎"
     }
+    else if(this.state.daysUntilNexTimeOff == 10000) {
+      // No leave planned
+      nextTimeOff = "No time off scheduled, book it in"
+    }
     else {
       nextTimeOff = `${nextTimeOff} ${this.state.daysUntilNexTimeOff} days`
     }

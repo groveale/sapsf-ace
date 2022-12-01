@@ -1,10 +1,13 @@
-import { ISPFxAdaptiveCard, BaseAdaptiveCardView } from '@microsoft/sp-adaptive-card-extension-base';
+import { ISPFxAdaptiveCard, BaseAdaptiveCardView, IActionArguments } from '@microsoft/sp-adaptive-card-extension-base';
 import * as strings from 'TimeOffAzureAdaptiveCardExtensionStrings';
-import { ITimeOffAzureAdaptiveCardExtensionProps, ITimeOffAzureAdaptiveCardExtensionState } from '../TimeOffAzureAdaptiveCardExtension';
+import { ITimeAccount } from '../models/ITimeAccount';
+import { HISTORY_QUICK_VIEW_REGISTRY_ID, ITimeOffAzureAdaptiveCardExtensionProps, ITimeOffAzureAdaptiveCardExtensionState } from '../TimeOffAzureAdaptiveCardExtension';
 
 export interface IQuickViewData {
   subTitle: string;
   title: string;
+  items: ITimeAccount[]
+  faqsLink: string
 }
 
 export class QuickView extends BaseAdaptiveCardView<
@@ -15,11 +18,23 @@ export class QuickView extends BaseAdaptiveCardView<
   public get data(): IQuickViewData {
     return {
       subTitle: strings.SubTitle,
-      title: strings.Title
+      title: strings.Title,
+      items: this.state.timeOffAccounts,
+      faqsLink: this.properties.FAQLink
     };
   }
 
   public get template(): ISPFxAdaptiveCard {
-    return require('./template/QuickViewTemplate.json');
+    return require('./template/BalancesTimeOff.json');
+  }
+
+  public onAction(action: IActionArguments): void {
+    if (action.type === 'Submit') {
+      const { id, newIndex } = action.data;
+      if (id === 'viewHistory') {
+        // false is important if not updating the state
+        this.quickViewNavigator.push(HISTORY_QUICK_VIEW_REGISTRY_ID, false)
+      }
+    }
   }
 }

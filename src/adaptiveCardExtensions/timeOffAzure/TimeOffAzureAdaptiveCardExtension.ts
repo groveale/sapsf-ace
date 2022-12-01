@@ -3,6 +3,7 @@ import { BaseAdaptiveCardExtension } from '@microsoft/sp-adaptive-card-extension
 import { CardView } from './cardView/CardView';
 import { LoadingCardView } from './cardView/LoadingCardView'
 import { QuickView } from './quickView/QuickView';
+import { HistoryQuickView } from './quickView/HistoryQuickView';
 import { TimeOffAzurePropertyPane } from './TimeOffAzurePropertyPane';
 import { AadHttpClient } from '@microsoft/sp-http';
 import { ITimeAccount } from './models/ITimeAccount'
@@ -45,6 +46,7 @@ const ERROR_CARD_VIEW_REGISTRY_ID: string = 'ERROR_CARD_VIEW';
 const UNCONFIGURED_CARD_VIEW_REGISTRY_ID: string = 'UNCONFIGURED_CARD_VIEW';
 
 export const QUICK_VIEW_REGISTRY_ID: string = 'TimeOffAzure_QUICK_VIEW';
+export const HISTORY_QUICK_VIEW_REGISTRY_ID: string = 'HISTORY_QUICK_VIEW';
 
 export default class TimeOffAzureAdaptiveCardExtension extends BaseAdaptiveCardExtension<
   ITimeOffAzureAdaptiveCardExtensionProps,
@@ -72,6 +74,7 @@ export default class TimeOffAzureAdaptiveCardExtension extends BaseAdaptiveCardE
     this.cardNavigator.register(LOADING_CARD_VIEW_REGISTRY_ID, () => new LoadingCardView());
     this.cardNavigator.register(CARD_VIEW_REGISTRY_ID, () => new CardView());
     this.quickViewNavigator.register(QUICK_VIEW_REGISTRY_ID, () => new QuickView());
+    this.quickViewNavigator.register(HISTORY_QUICK_VIEW_REGISTRY_ID, () => new HistoryQuickView());
 
     // First Step is to get SAP User Name
     await this.getSAPSFUserNameFromAAD()
@@ -187,6 +190,7 @@ export default class TimeOffAzureAdaptiveCardExtension extends BaseAdaptiveCardE
             let timeBooked: ITimeBookedResponse = await this.getTimeOffBalanceFromTimeOffAPI(timeAccount.sapIdentifierTAT, timeAccount.sapIdentifierTT)
 
             timeAccount.balanceDays = timeBooked.balanceDays
+            timeAccount.balanceDaysString = timeAccount.balanceDays.toString()
             timeAccount.blanaceHours = timeBooked.balanceHours
             timeAccount.timeBookedPast = timeBooked.timeBookedPast
             timeAccount.timeBookedUpcoming = timeBooked.timeBookedUpcoming
