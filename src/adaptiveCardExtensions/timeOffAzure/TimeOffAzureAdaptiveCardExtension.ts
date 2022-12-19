@@ -82,13 +82,15 @@ export default class TimeOffAzureAdaptiveCardExtension extends BaseAdaptiveCardE
     // Init the Time Off API
     await this.initTimeOffAPI()
 
-    // Now Get SAP timeaccount details from SPO list and balances from SAP
+    // // Now Get SAP timeaccount details from SPO list and balances from SAP
     await this.getTimeAccountsFromSPOList()
 
     // Work out days until next time off
-    //this.setState( { cardState: CardState.Loaded });
+    this.setState( { cardState: CardState.Loaded });
+    
+    //await this._fetchData();
 
-    return Promise.resolve(); // this._fetchData();
+    return Promise.resolve()
   }
 
   protected loadPropertyPaneResources(): Promise<void> {
@@ -290,15 +292,15 @@ export default class TimeOffAzureAdaptiveCardExtension extends BaseAdaptiveCardE
   }
 
   // Legacy
-  private _fetchData(): Promise<void> {
-    return this.context.aadHttpClientFactory
-      .getClient('018ef16d-b0c0-45b7-b383-ab8718c63d9a')
-      .then(client => client.get('https://spfx-aces101.azurewebsites.net/api/GetSFTimeAccountBalances?$sapUserNameToSearch=sfadmin&?timeAccountType=TAT_VAC_REC', AadHttpClient.configurations.v1))
-      .then(response => response.json())
-      .then(balances => {
-        this.setState({
-          timeOffAccounts: balances
-        });
+  private async _fetchData(): Promise<void> {
+    return await this.context.httpClient
+      .get('https://senddatatoace.azurewebsites.net/api/dummydata', HttpClient.configurations.v1)
+      .then((res: HttpClientResponse): Promise<any> => {
+        return res.json();
+      })
+      .then((response: any): void => {
+        console.log(response);
       });
   }
 }
+  

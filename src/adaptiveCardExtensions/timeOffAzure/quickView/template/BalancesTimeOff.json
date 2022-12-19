@@ -131,7 +131,7 @@
                 },
                 {
                     "type": "Container",
-                    "$data": "${pastTime}",
+                    "$data": "${upcomingLeave}",
                     "items": [
                         {
                             "type": "TextBlock",

@@ -1,6 +1,7 @@
 import { ISPFxAdaptiveCard, BaseAdaptiveCardView, IActionArguments } from '@microsoft/sp-adaptive-card-extension-base';
 import * as strings from 'TimeOffAzureAdaptiveCardExtensionStrings';
 import { ITimeAccount } from '../models/ITimeAccount';
+import { ITimeBooked } from '../models/ITimeBooked';
 import { HISTORY_QUICK_VIEW_REGISTRY_ID, ITimeOffAzureAdaptiveCardExtensionProps, ITimeOffAzureAdaptiveCardExtensionState } from '../TimeOffAzureAdaptiveCardExtension';
 
 export interface IQuickViewData {
@@ -8,6 +9,7 @@ export interface IQuickViewData {
   title: string;
   items: ITimeAccount[]
   faqsLink: string
+  upcomingLeave: ITimeBooked[]
 }
 
 export class QuickView extends BaseAdaptiveCardView<
@@ -20,7 +22,8 @@ export class QuickView extends BaseAdaptiveCardView<
       subTitle: strings.SubTitle,
       title: strings.Title,
       items: this.state.timeOffAccounts,
-      faqsLink: this.properties.FAQLink
+      faqsLink: this.properties.FAQLink,
+      upcomingLeave: this.state.timeOffAccounts[0].timeBookedUpcoming
     };
   }
 
